@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
@@ -10,27 +10,40 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useDemo } from "@/providers/demo-provider";
+import { useApi } from "@/providers/api-provider";
 import { ProjectPreview, ProjectIcon } from "./project-preview";
 import { Dialog } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { api } from "@/services/api";
+import { projectFromDto, type ProjectDto } from "@/services/dto";
+import type { Project } from "@/domain/types";
 import { safeExternalUrl } from "@/lib/utils";
 export function DetailPage() {
   const params = useSearchParams();
   const router = useRouter();
-  const { projects, user, adopt, matches } = useDemo();
-  const p = projects.find((p) => p.id === params.get("id"));
+  const { projects, user, adopt, matches } = useApi();
+  const id = params.get("id");
+  const [p, setProject] = useState<Project | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  useEffect(() => { let active = true; setLoading(true); setError(""); setProject(null);
+    if (!id) { setLoading(false); return; }
+    api<ProjectDto>("/projects/" + encodeURIComponent(id)).then(dto => { if (active) setProject(projectFromDto(dto)); })
+      .catch(e => { if (active) setError(e.message); }).finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [id]);
   const [confirm, setConfirm] = useState(false);
   const [preview, setPreview] = useState(false);
   const [accepted, setAccepted] = useState(false);
   const [busy, setBusy] = useState(false);
+  if (loading) return <p className="container py-16" role="status">Carregando sistema…</p>;
   if (!p || p.status !== "APPROVED")
     return (
       <div className="container py-16">
         <EmptyState
           title="Sistema indisponível"
-          description="Este projeto não está disponível na vitrine neste momento."
+          description={error || "Este projeto não está disponível na vitrine neste momento."}
         >
           <Link className="button button-primary" href="/">
             Voltar à vitrine
@@ -58,13 +71,13 @@ export function DetailPage() {
     }
     setConfirm(true);
   }
-  function finish() {
+  async function finish() {
     setBusy(true);
     try {
-      adopt(p!.id);
+      const redirect = safeExternalUrl(await adopt(p!.id));
       setConfirm(false);
       toast.success("Sistema adicionado ao seu painel.");
-      if (url) window.location.assign(url);
+      if (redirect) window.location.assign(redirect);
       else router.push("/lojista/sistemas/");
     } catch (e) {
       toast.error((e as Error).message);
@@ -81,12 +94,12 @@ export function DetailPage() {
         <div>
           <ProjectPreview project={p} large />
           <p className="preview-caption">
-            Prévia ilustrativa · Projeto fictício na demonstração
+            Ilustração da categoria do sistema
           </p>
           <section className="detail-description">
             <h2>Sobre o sistema</h2>
             <p>{p.description}</p>
-            <h2>O que você pode fazer</h2>
+            {p.features.length > 0 && <h2>O que você pode fazer</h2>}
             <ul className="feature-list">
               {p.features.map((f) => (
                 <li key={f}>
@@ -181,7 +194,7 @@ export function DetailPage() {
         open={preview}
         onOpenChange={setPreview}
         title={`Conheça ${p.title}`}
-        description="Este projeto é fictício. A imagem abaixo ilustra a proposta do sistema; não há um aplicativo externo conectado."
+        description="Ilustração da categoria do sistema. Acesse a demonstração externa para conhecer o produto."
       >
         <ProjectPreview project={p} />
       </Dialog>

@@ -5,13 +5,12 @@ export function TermsPage() {
       <p className="eyebrow">TRANSPARÊNCIA NA CONEXÃO</p>
       <h1 className="page-title">Termos e privacidade</h1>
       <p className="text-muted mt-3">
-        Versão de demonstração 1.0 · Minuta de produto, sujeita à revisão
+        Versão 1.0 · Minuta de produto, sujeita à revisão
         jurídica antes do lançamento.
       </p>
       <div className="notice my-8">
         <p>
-          Este ambiente usa projetos e perfis fictícios. Nenhum cadastro,
-          pagamento ou notificação externa é processado.
+          A plataforma registra cadastros, projetos e adoções e envia notificações de revogação por e-mail. Os sistemas adotados são mantidos pelos desenvolvedores.
         </p>
       </div>
       <section>
@@ -52,7 +51,7 @@ export function TermsPage() {
       <section>
         <h2>5. Dados da plataforma</h2>
         <p>
-          A implementação integrada utilizará dados de conta, informações do
+          A plataforma utiliza dados de conta, informações do
           negócio, projetos, adoções e registros operacionais. Antes do
           lançamento, a política final deverá identificar o responsável pelo
           tratamento, bases legais, destinatários, prazos de retenção e canal

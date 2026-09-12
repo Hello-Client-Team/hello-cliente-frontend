@@ -2,14 +2,15 @@
 import { useState } from "react";
 import { Clock3, CheckCheck } from "lucide-react";
 import { toast } from "sonner";
-import { useDemo } from "@/providers/demo-provider";
+import { useApi } from "@/providers/api-provider";
 import { WorkspaceNav } from "@/components/layout/site-shell";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { formatDate } from "@/lib/utils";
 export function DeletionsPage() {
-  const { revocations, projects, user, declareDeletion } = useDemo();
+  const { revocations, projects, user, declareDeletion } = useApi();
+  const [busy, setBusy] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const mine = revocations.filter((r) =>
     projects.some((p) => p.id === r.projectId && p.developerId === user?.id),
@@ -48,6 +49,7 @@ export function DeletionsPage() {
                     {projects.find((p) => p.id === r.projectId)?.title} · Match{" "}
                     {r.matchId}
                   </p>
+                  <p className="text-sm">{r.notificationAcceptedAt ? "Notificação aceita pelo servidor de e-mail" : "Notificação aguardando envio"}</p>
                   <p>Solicitado: {formatDate(r.requestedAt)}</p>
                   <p className={r.declaredAt ? "success-line" : "warning-line"}>
                     {r.declaredAt
@@ -82,14 +84,16 @@ export function DeletionsPage() {
               Cancelar
             </Button>
             <Button
-              onClick={() => {
+              disabled={busy}
+              onClick={async () => {
+                setBusy(true);
                 try {
-                  declareDeletion(selected!);
+                  await declareDeletion(selected!);
                   setSelected(null);
-                  toast.success("Declaração registrada na demonstração.");
+                  toast.success("Declaração de exclusão registrada.");
                 } catch (e) {
                   toast.error((e as Error).message);
-                }
+                } finally { setBusy(false); }
               }}
             >
               Confirmar declaração

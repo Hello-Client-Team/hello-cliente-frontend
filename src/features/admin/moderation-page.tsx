@@ -1,8 +1,9 @@
 "use client";
 import { useState } from "react";
+import { ProjectHistory } from "./project-history";
 import { Check, X, ExternalLink, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
-import { useDemo } from "@/providers/demo-provider";
+import { useApi } from "@/providers/api-provider";
 import { WorkspaceNav } from "@/components/layout/site-shell";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -12,18 +13,18 @@ import { Button } from "@/components/ui/button";
 import { safeExternalUrl } from "@/lib/utils";
 import type { ProjectStatus } from "@/domain/types";
 export function ModerationPage() {
-  const { projects, moderate } = useDemo();
+  const { projects, moderate } = useApi();
   const [status, setStatus] = useState<ProjectStatus | "ALL">("PENDING");
   const [selected, setSelected] = useState<string | null>(null);
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
   const p = projects.find((p) => p.id === selected);
   const list = projects.filter((p) => status === "ALL" || p.status === status);
-  function decide(decision: "APPROVED" | "REJECTED") {
+  async function decide(decision: "APPROVED" | "REJECTED") {
     if (!p) return;
     setBusy(true);
     try {
-      moderate(p.id, decision, reason);
+      await moderate(p.id, decision, reason);
       toast.success(
         decision === "APPROVED"
           ? "Projeto aprovado e disponível na vitrine."
@@ -151,7 +152,7 @@ export function ModerationPage() {
                       const safe = safeExternalUrl(url);
                       if (safe)
                         window.open(safe, "_blank", "noopener,noreferrer");
-                      else toast.info("Projeto fictício, sem URL externa.");
+                      else toast.info("Endereço externo indisponível.");
                     }}
                   >
                     {label}
@@ -164,13 +165,7 @@ export function ModerationPage() {
                   <p>{p.reason}</p>
                 </div>
               )}
-              {p.status === "SUSPENDED" && (
-                <div className="health-history">
-                  <strong>Verificações de demonstração</strong>
-                  <p>3 tentativas consecutivas · Timeout</p>
-                  <small>Histórico ilustrativo, sem requisições reais.</small>
-                </div>
-              )}
+              <ProjectHistory id={p.id} />
               <div className="field">
                 <label htmlFor="reason">
                   Justificativa{" "}

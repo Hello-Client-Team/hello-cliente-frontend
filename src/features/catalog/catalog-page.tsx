@@ -16,7 +16,7 @@ import {
   X,
 } from "lucide-react";
 import { categories, type Category } from "@/domain/types";
-import { useDemo } from "@/providers/demo-provider";
+import { useApi } from "@/providers/api-provider";
 import { ProjectCard } from "./project-card";
 import { EmptyState } from "@/components/ui/empty-state";
 const icons = [
@@ -28,7 +28,7 @@ const icons = [
   MessagesSquare,
 ];
 export function CatalogPage() {
-  const { projects } = useDemo();
+  const { projects, loading, error, reload } = useApi();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<Category>("Todos");
   const [sort, setSort] = useState("recommended");
@@ -148,7 +148,7 @@ export function CatalogPage() {
           <Check size={16} /> Projetos aprovados na vitrine
         </span>
       </div>
-      {visible.length ? (
+      {loading ? <p role="status">Carregando sistemas…</p> : error ? <div role="alert"><p>{error}</p><button className="button button-secondary" onClick={() => void reload()}>Tentar novamente</button></div> : visible.length ? (
         <div className="project-grid">
           {visible.map((p) => (
             <ProjectCard key={p.id} project={p} />

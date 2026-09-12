@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ArrowLeft, Send, Info } from "lucide-react";
 import { toast } from "sonner";
-import { useDemo } from "@/providers/demo-provider";
+import { useApi } from "@/providers/api-provider";
 import { categories } from "@/domain/types";
 import { WorkspaceNav } from "@/components/layout/site-shell";
 import { Field } from "@/components/ui/field";
@@ -34,7 +34,7 @@ const projectSchema = z.object({
 });
 type Values = z.infer<typeof projectSchema>;
 export function ProjectForm() {
-  const { projects, user, submit } = useDemo();
+  const { projects, user, submit } = useApi();
   const params = useSearchParams();
   const router = useRouter();
   const id = params.get("id");
@@ -62,7 +62,7 @@ export function ProjectForm() {
     );
   async function onSubmit(values: Values) {
     try {
-      submit({
+      await submit({
         ...values,
         id: existing?.id ?? crypto.randomUUID(),
         developerId: user!.id,
@@ -74,7 +74,7 @@ export function ProjectForm() {
         features: existing?.features ?? [
           "Conheça as funcionalidades na demonstração",
         ],
-      });
+      }, !!existing);
       toast.success("Projeto enviado para análise.");
       router.push("/dev/projetos/");
     } catch (e) {

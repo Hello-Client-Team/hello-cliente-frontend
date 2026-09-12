@@ -10,7 +10,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useDemo } from "@/providers/demo-provider";
+import { useApi } from "@/providers/api-provider";
 import { WorkspaceNav } from "@/components/layout/site-shell";
 import { Dialog } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -18,21 +18,21 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { ProjectIcon } from "@/features/catalog/project-preview";
 import { formatDate, safeExternalUrl } from "@/lib/utils";
 export function SystemsPage() {
-  const { user, projects, matches, revocations, revoke } = useDemo();
+  const { user, projects, matches, revocations, revoke } = useApi();
   const [tab, setTab] = useState("active");
   const [selected, setSelected] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const mine = matches.filter((m) => m.merchantId === user?.id);
   const active = mine.filter((m) => m.status === "ACTIVE");
   const revoked = mine.filter((m) => m.status === "REVOKED");
-  function confirm() {
+  async function confirm() {
     if (!selected) return;
     setBusy(true);
     try {
-      revoke(selected);
+      await revoke(selected);
       setSelected(null);
       toast.success(
-        "Revogação registrada na demonstração. Nenhum e-mail foi enviado.",
+        "Revogação registrada. Acompanhe a notificação e o prazo neste painel.",
       );
     } catch (e) {
       toast.error((e as Error).message);
@@ -106,6 +106,7 @@ export function SystemsPage() {
                       endereço pode estar indisponível.
                     </p>
                   )}
+                  {r && <p className="text-sm text-muted">{r.notificationAcceptedAt ? "Notificação aceita pelo servidor de e-mail" : "Notificação aguardando envio"}</p>}
                   {r && (
                     <p
                       className={r.declaredAt ? "success-line" : "warning-line"}
@@ -126,12 +127,12 @@ export function SystemsPage() {
                     <Button
                       variant="secondary"
                       onClick={() => {
-                        const url = safeExternalUrl(p.productionUrl);
+                        const url = safeExternalUrl(m.productionUrlSnapshot ?? p.productionUrl);
                         if (url)
                           window.open(url, "_blank", "noopener,noreferrer");
                         else
                           toast.info(
-                            "Este é um sistema fictício, sem endereço externo conectado.",
+                            "O endereço do sistema não está disponível.",
                           );
                       }}
                     >
@@ -177,12 +178,11 @@ export function SystemsPage() {
             if (!open) setSelected(null);
           }}
           title="Revogar acesso ao sistema?"
-          description="O sistema sairá da sua lista de adoções ativas. Na aplicação integrada, o desenvolvedor será notificado para excluir seus dados externos em até 48 horas."
+          description="O sistema sairá da sua lista de adoções ativas. O desenvolvedor será notificado para excluir seus dados externos em até 48 horas."
         >
           <div className="notice">
             <p>
-              Você poderá acompanhar a solicitação na aba Revogações. Nesta
-              demonstração, nenhum e-mail é enviado.
+              Você poderá acompanhar o prazo e a declaração de exclusão na aba Revogações.
             </p>
           </div>
           <div className="dialog-actions">

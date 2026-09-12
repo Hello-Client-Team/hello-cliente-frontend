@@ -1,13 +1,13 @@
 "use client";
 import Link from "next/link";
 import { Plus, Pencil, Code2, ArrowUpRight } from "lucide-react";
-import { useDemo } from "@/providers/demo-provider";
+import { useApi } from "@/providers/api-provider";
 import { WorkspaceNav } from "@/components/layout/site-shell";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ProjectIcon } from "@/features/catalog/project-preview";
 import { EmptyState } from "@/components/ui/empty-state";
 export function ProjectsPage() {
-  const { projects, user, matches } = useDemo();
+  const { projects, user, matches } = useApi();
   const mine = projects.filter((p) => p.developerId === user?.id);
   return (
     <>
@@ -36,14 +36,10 @@ export function ProjectsPage() {
             </strong>
           </div>
           <div className="metric">
-            <span>Adoções ativas</span>
+            <span>Projetos em análise</span>
             <strong>
-              {matches
-                .filter(
-                  (m) =>
-                    m.status === "ACTIVE" &&
-                    mine.some((p) => p.id === m.projectId),
-                )
+              {mine
+                .filter((p) => p.status === "PENDING")
                 .length.toString()
                 .padStart(2, "0")}
             </strong>
