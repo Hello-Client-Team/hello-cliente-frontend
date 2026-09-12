@@ -26,6 +26,7 @@ export interface Project {
   reason?: string;
 }
 export interface Match {
+  productionUrlSnapshot?: string;
   id: string;
   merchantId: string;
   projectId: string;
@@ -35,6 +36,8 @@ export interface Match {
   termsVersion: string;
 }
 export interface Revocation {
+  notificationAcceptedAt?: string;
+  status?: string;
   id: string;
   matchId: string;
   merchantName: string;
