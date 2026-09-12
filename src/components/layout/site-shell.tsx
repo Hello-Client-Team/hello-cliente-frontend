@@ -11,7 +11,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
-import { useDemo } from "@/providers/demo-provider";
+import { useApi } from "@/providers/api-provider";
 export function Brand() {
   return (
     <Link href="/" className="brand" aria-label="Hello Cliente — início">
@@ -26,7 +26,7 @@ export function Brand() {
   );
 }
 export function SiteShell({ children }: { children: ReactNode }) {
-  const { user, logout } = useDemo();
+  const { user, logout } = useApi();
   const pathname = usePathname();
   const [menu, setMenu] = useState(false);
   const dashboard =
@@ -40,10 +40,6 @@ export function SiteShell({ children }: { children: ReactNode }) {
       <a className="skip-link" href="#conteudo">
         Pular para o conteúdo
       </a>
-      <div className="demo-strip">
-        <span>AMBIENTE DE DEMONSTRAÇÃO</span> Explore os fluxos com dados
-        fictícios. Alterações duram até recarregar.
-      </div>
       <header className="site-header">
         <div className="header-inner">
           <Brand />
@@ -78,7 +74,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
                 </span>
                 <button
                   className="icon-button"
-                  onClick={logout}
+                  onClick={() => void logout()}
                   aria-label="Sair"
                 >
                   <LogOut size={18} />
@@ -128,6 +124,7 @@ export function WorkspaceNav({
       ? [
           ["/dev/projetos/", "Meus projetos"],
           ["/dev/exclusoes/", "Solicitações de exclusão"],
+          ["/dev/completar-cadastro/", "Perfil e acessos"],
         ]
       : role === "ADMIN"
         ? [["/admin/moderacao/", "Moderação de projetos"]]

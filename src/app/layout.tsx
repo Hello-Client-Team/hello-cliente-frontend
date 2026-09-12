@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Toaster } from "sonner";
-import { DemoProvider } from "@/providers/demo-provider";
+import { ApiProvider } from "@/providers/api-provider";
 import { SiteShell } from "@/components/layout/site-shell";
 import "./globals.css";
 export const metadata: Metadata = {
@@ -20,7 +20,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body>
-        <DemoProvider>
+        <ApiProvider>
           <SiteShell>
             <Suspense
               fallback={
@@ -33,7 +33,7 @@ export default function RootLayout({
             </Suspense>
           </SiteShell>
           <Toaster richColors position="bottom-right" />
-        </DemoProvider>
+        </ApiProvider>
       </body>
     </html>
   );

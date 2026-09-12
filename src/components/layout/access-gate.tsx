@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { LockKeyhole } from "lucide-react";
 import type { ReactNode } from "react";
 import type { Role } from "@/domain/types";
-import { useDemo } from "@/providers/demo-provider";
+import { useApi } from "@/providers/api-provider";
 export function AccessGate({
   role,
   children,
@@ -12,8 +12,10 @@ export function AccessGate({
   role: Role;
   children: ReactNode;
 }) {
-  const { user } = useDemo();
+  const { user, loading, error, reload } = useApi();
   const path = usePathname();
+  if (loading) return <p className="container py-20" role="status">Carregando seu painel…</p>;
+  if (error) return <div className="container py-20" role="alert"><p>{error}</p><button className="button button-secondary" onClick={() => void reload()}>Tentar novamente</button></div>;
   if (user?.role === role) return children;
   return (
     <section className="container narrow py-20 text-center">
@@ -34,7 +36,7 @@ export function AccessGate({
         className="button button-primary"
         href={`/entrar/?perfil=${role.toLowerCase()}&next=${encodeURIComponent(path)}`}
       >
-        Escolher acesso de demonstração
+        Entrar na minha conta
       </Link>
     </section>
   );
